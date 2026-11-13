@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ujian Harian Sumatif: Sistem Operasi Komputer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    /* Animasi pulse untuk peringatan timer */
+    @keyframes pulseWarning {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .timer-danger {
+      animation: pulseWarning 1s infinite;
+    }
+
+    /* Styling khusus untuk cetak PDF */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-break-inside {
+        break-inside: avoid;
+      }
+      .shadow-lg, .shadow-md, .shadow-sm {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- HEADER / NAVBAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">Ujian Harian Sumatif</h1>
+          <p class="text-xs text-slate-500 font-medium">Mata Pelajaran: Informatika / Sistem Komputer</p>
+        </div>
+      </div>
+
+      <!-- Info Peserta & Timer saat ujian berlangsung -->
+      <div id="exam-header-info" class="hidden flex items-center gap-3 sm:gap-5">
+        <div class="hidden md:block text-right">
+          <p id="header-student-name" class="text-xs font-bold text-slate-800"></p>
+          <p id="header-student-class" class="text-[11px] text-slate-500"></p>
+        </div>
+        <div id="timer-box" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 font-mono font-bold text-sm sm:text-base transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" id="timer-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span id="timer-display">45:00</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- ==================== 1. HALAMAN SAMBUTAN (LANDING) ==================== -->
+    <section id="landing-screen" class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-8 text-white">
+          <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-semibold tracking-wide uppercase mb-3">
+            Evaluasi Pembelajaran Digital
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Sistem Operasi Komputer</h2>
+          <p class="mt-2 text-indigo-100 text-sm sm:text-base">
+            Uji pemahaman mengenai arsitektur kernel, manajemen proses, penjadwalan CPU, manajemen memori, sistem berkas, deadlock, serta perbandingan sistem operasi modern.
+          </p>
+        </div>
+
+        <div class="p-6 sm:p-8">
+          <!-- Ringkasan Aturan Ujian -->
+          <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-center">
+              <p class="text-xs text-slate-500 font-medium">Jumlah Soal</p>
+              <p class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">25 Soal</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-center">
+              <p class="text-xs text-slate-500 font-medium">Durasi Waktu</p>
+              <p class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">45 Menit</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-center">
+              <p class="text-xs text-slate-500 font-medium">Tipe Soal</p>
+              <p class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">Pilgan (A–E)</p>
+            </div>
+          </div>
+
+          <!-- Form Identitas Siswa -->
+          <form id="start-form" class="space-y-4">
+            <div>
+              <label for="student-name" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                Nama Lengkap Siswa <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="student-name"
+                required
+                placeholder="Contoh: Ahmad Fauzan"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div>
+              <label for="student-class" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                Kelas / Rombongan Belajar <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="student-class"
+                required
+                placeholder="Contoh: X TJKT 1 / X IPA 2"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              />
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs sm:text-sm text-amber-800 space-y-1.5">
+              <p class="font-bold flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                Petunjuk Pengerjaan:
+              </p>
+              <ul class="list-disc list-inside space-y-1 text-amber-900/90">
+                <li>Pastikan nama dan kelas diisi dengan benar sebelum memulai.</li>
+                <li>Timer 45 menit akan langsung berjalan setelah tombol <strong>Mulai Ujian</strong> ditekan.</li>
+                <li>Jika waktu habis, sistem akan otomatis mengumpulkan seluruh jawaban yang tersimpan.</li>
+              </ul>
+            </div>
+
+            <button
+              type="submit"
+              class="w-full mt-2 py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-base shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Mulai Ujian Sekarang</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. HALAMAN UJIAN (EXAM INTERFACE) ==================== -->
+    <section id="exam-screen" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Kolom Kiri: Area Soal Utama -->
+        <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-8">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-100">
+            <span id="question-badge" class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs sm:text-sm">
+              Soal No. 1 dari 25
+            </span>
+            <span id="question-topic" class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+              Topik: Konsep Dasar OS
+            </span>
+          </div>
+
+          <!-- Teks Pertanyaan -->
+          <div class="mt-5 mb-6">
+            <p id="question-text" class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed"></p>
+          </div>
+
+          <!-- Daftar Opsi Jawaban A-E -->
+          <div id="options-container" class="space-y-3"></div>
+
+          <!-- Tombol Navigasi Bawah Soal -->
+          <div class="mt-8 pt-5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              id="btn-prev"
+              class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Sebelumnya
+            </button>
+
+            <button
+              type="button"
+              id="btn-clear-answer"
+              class="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+            >
+              Hapus Pilihan
+            </button>
+
+            <button
+              type="button"
+              id="btn-next"
+              class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <span>Selanjutnya</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Panel Navigasi Nomor Soal & Submit -->
+        <aside class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 sticky top-22">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-slate-900 text-sm sm:text-base">Navigasi Soal</h3>
+            <span id="answered-counter" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              0 / 25 Dijawab
+            </span>
+          </div>
+
+          <!-- Grid Nomor 1 - 25 -->
+          <div id="question-nav-grid" class="grid grid-cols-5 gap-2 mb-5"></div>
+
+          <!-- Legenda Status -->
+          <div class="space-y-2 text-xs text-slate-600 pt-4 border-t border-slate-100 mb-6">
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded bg-indigo-600 inline-block"></span>
+              <span>Sedang Aktif</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded bg-emerald-500 inline-block"></span>
+              <span>Sudah Dijawab</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded bg-slate-100 border border-slate-300 inline-block"></span>
+              <span>Belum Dijawab</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="btn-open-submit-modal"
+            class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            Selesai & Kumpulkan Ujian
+          </button>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ==================== 3. HALAMAN HASIL & PEMBAHASAN (RESULT) ==================== -->
+    <section id="result-screen" class="hidden max-w-4xl mx-auto space-y-6">
+      <!-- Kartu Skor Utama -->
+      <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+        <div class="bg-slate-900 px-6 py-6 sm:px-8 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <span class="text-xs uppercase tracking-wider font-semibold text-indigo-400">Laporan Hasil Ujian Sumatif</span>
+            <h2 class="text-xl sm:text-2xl font-bold mt-1">Sistem Operasi Komputer</h2>
+            <p class="text-sm text-slate-300 mt-1">
+              Peserta: <strong id="res-student-name" class="text-white"></strong> &bull; Kelas: <strong id="res-student-class" class="text-white"></strong>
+            </p>
+            <p id="res-timestamp" class="text-xs text-slate-400 mt-0.5"></p>
+          </div>
+          <div class="flex items-center gap-2 no-print">
+            <button
+              type="button"
+              onclick="window.print()"
+              class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold border border-white/20 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Cetak / Simpan PDF
+            </button>
+            <button
+              type="button"
+              id="btn-retry-exam"
+              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Ulangi Ujian
+            </button>
+          </div>
+        </div>
+
+        <!-- Statistik Nilai -->
+        <div class="p-6 sm:p-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="col-span-2 sm:col-span-1 bg-indigo-50 border border-indigo-200 rounded-2xl p-4 text-center flex flex-col justify-center">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Skor Akhir</span>
+            <span id="res-score" class="text-4xl font-extrabold text-indigo-700 mt-1">0</span>
+            <span id="res-predicate" class="text-xs font-semibold mt-1 text-indigo-900"></span>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center flex flex-col justify-center">
+            <span class="text-xs font-semibold text-emerald-700">Jawaban Benar</span>
+            <span id="res-correct" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</span>
+            <span class="text-[11px] text-emerald-700 mt-0.5">dari 25 soal</span>
+          </div>
+          <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center flex flex-col justify-center">
+            <span class="text-xs font-semibold text-rose-700">Jawaban Salah</span>
+            <span id="res-wrong" class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-1">0</span>
+            <span class="text-[11px] text-rose-700 mt-0.5">termasuk kosong</span>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center flex flex-col justify-center">
+            <span class="text-xs font-semibold text-slate-600">Waktu Pengerjaan</span>
+            <span id="res-duration" class="text-xl sm:text-2xl font-extrabold text-slate-800 mt-1">00:00</span>
+            <span class="text-[11px] text-slate-500 mt-0.5">menit : detik</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Pembahasan Per Soal -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200 mb-6">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Review & Pembahasan Jawaban</h3>
+            <p class="text-xs sm:text-sm text-slate-500">Evaluasi detail setiap butir soal beserta penjelasan konsepnya.</p>
+          </div>
+          <div class="flex items-center gap-2 no-print">
+            <button type="button" onclick="filterReview('all')" id="filter-all" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white cursor-pointer">Semua (25)</button>
+            <button type="button" onclick="filterReview('wrong')" id="filter-wrong" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">Salah / Kosong</button>
+          </div>
+        </div>
+
+        <div id="review-list" class="space-y-5"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL KONFIRMASI SUBMIT -->
+  <div id="submit-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+      <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-center text-slate-900">Konfirmasi Pengumpulan Ujian</h3>
+      <p id="modal-summary-text" class="text-sm text-slate-600 text-center mt-2 leading-relaxed"></p>
+      <div class="mt-6 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          id="btn-cancel-submit"
+          class="py-2.5 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition cursor-pointer"
+        >
+          Kembali Cek Soal
+        </button>
+        <button
+          type="button"
+          id="btn-confirm-submit"
+          class="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition cursor-pointer"
+        >
+          Ya, Kumpulkan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-10 no-print">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+      Sistem Evaluasi Pembelajaran Informatika &bull; Modul Sistem Operasi Komputer
+    </div>
+  </footer>
+
+  <!-- ==================== LOGIKA JAVASCRIPT & BANK SOAL ==================== -->
+  <script>
+    // Bank 25 Soal Pilihan Ganda (A-E) + Kunci Jawaban Tersembunyi + Pembahasan
+    const quizData = [
+      {
+        id: 1,
+        topic: "Konsep Dasar Sistem Operasi",
+        question: "Apa fungsi utama sistem operasi sebagai 'Resource Allocator' dalam sistem komputer?",
+        options: [
+          "Menyusun kode sumber aplikasi tingkat tinggi menjadi bahasa mesin",
+          "Mengelola dan mengalokasikan sumber daya perangkat keras seperti CPU, memori, dan I/O secara adil dan efisien antar program",
+          "Menghubungkan komputer secara langsung ke jaringan internet tanpa melalui protokol TCP/IP",
+          "Menghapus seluruh berkas sementara secara otomatis setiap kali komputer dinyalakan ulang",
+          "Menggantikan peran BIOS/UEFI dalam melakukan pengecekan perangkat keras awal (POST)"
+        ],
+        answerIndex: 1,
+        explanation: "Sebagai Resource Allocator, sistem operasi bertindak sebagai pengelola sumber daya (waktu CPU, ruang memori, penyimpanan berkas, perangkat I/O) dan memutuskan bagaimana sumber daya tersebut dialokasikan kepada berbagai proses yang bersaing."
+      },
+      {
+        id: 2,
+        topic: "Arsitektur Kernel",
+        question: "Perbedaan mendasar antara arsitektur Monolithic Kernel dan Microkernel terletak pada...",
+        options: [
+          "Monolithic kernel hanya berjalan pada prosesor 32-bit, sedangkan microkernel hanya untuk 64-bit",
+          "Microkernel tidak memiliki kemampuan manajemen memori virtual",
+          "Monolithic kernel menjalankan seluruh layanan inti OS (driver, file system, manajemen proses) di ruang kernel (kernel space), sedangkan microkernel memindahkan sebagian besar layanan ke ruang pengguna (user space)",
+          "Monolithic kernel tidak membutuhkan system call untuk berkomunikasi dengan perangkat keras",
+          "Microkernel selalu memiliki performa eksekusi I/O lebih cepat dibanding monolithic kernel karena tanpa pertukaran pesan"
+        ],
+        answerIndex: 2,
+        explanation: "Pada Monolithic Kernel (seperti Linux), seluruh layanan sistem berjalan di dalam satu ruang alamat kernel demi kecepatan, sedangkan pada Microkernel (seperti MINIX atau QNX), hanya fungsi paling dasar yang berada di kernel dan layanan lain berjalan di user space untuk meningkatkan stabilitas dan keamanan."
+      },
+      {
+        id: 3,
+        topic: "Mode Operasi CPU",
+        question: "Mengapa sistem operasi modern memisahkan mode eksekusi prosesor menjadi User Mode dan Kernel Mode (Dual-Mode Operation)?",
+        options: [
+          "Agar pengguna dapat menjalankan dua sistem operasi berbeda secara bersamaan tanpa virtualisasi",
+          "Untuk membatasi kecepatan clock CPU saat menjalankan aplikasi perkantoran",
+          "Untuk melindungi sistem operasi dan perangkat keras dari akses langsung atau instruksi berbahaya oleh program aplikasi pengguna",
+          "Supaya kapasitas RAM fisik dapat digandakan secara otomatis saat bermain gim",
+          "Agar sistem berkas NTFS dapat terbaca langsung di dalam BIOS"
+        ],
+        answerIndex: 2,
+        explanation: "Dual-Mode Operation (dikendalikan oleh mode bit pada perangkat keras) memastikan instruksi-instruksi istimewa (privileged instructions) yang mengakses perangkat keras secara langsung hanya dapat dieksekusi dalam Kernel Mode."
+      },
+      {
+        id: 4,
+        topic: "System Call",
+        question: "Mekanisme antarmuka yang disediakan oleh sistem operasi agar program di ruang pengguna (user space) dapat meminta layanan istimewa kepada kernel disebut...",
+        options: [
+          "Interrupt Vector",
+          "System Call",
+          "Context Switch",
+          "Bootstrap Loader",
+          "DMA Controller"
+        ],
+        answerIndex: 1,
+        explanation: "System Call menyediakan antarmuka pemrograman (biasanya diakses melalui API seperti POSIX atau Win32) bagi proses pengguna untuk meminta layanan kernel seperti membaca berkas, membuat proses baru, atau mengalokasikan memori."
+      },
+      {
+        id: 5,
+        topic: "Manajemen Proses",
+        question: "Dalam siklus hidup proses (Process State), ketika sebuah proses sedang dieksekusi oleh CPU lalu memerlukan operasi pembacaan data dari disk (I/O), status proses tersebut akan berubah dari 'Running' menjadi...",
+        options: [
+          "New",
+          "Ready",
+          "Waiting / Blocked",
+          "Terminated",
+          "Zombie"
+        ],
+        answerIndex: 2,
+        explanation: "Ketika proses yang sedang berjalan (Running) harus menunggu suatu kejadian eksternal seperti selesainya operasi I/O, proses berpindah ke status Waiting (Blocked) agar CPU dapat digunakan oleh proses lain yang berada di antrean Ready."
+      },
+      {
+        id: 6,
+        topic: "Process Control Block (PCB)",
+        question: "Struktur data di dalam kernel yang menyimpan seluruh informasi penting milik suatu proses—seperti Process ID (PID), status proses, Program Counter, dan isi register CPU—disebut...",
+        options: [
+          "File Allocation Table (FAT)",
+          "Master Boot Record (MBR)",
+          "Process Control Block (PCB)",
+          "Translation Lookaside Buffer (TLB)",
+          "Interrupt Descriptor Table (IDT)"
+        ],
+        answerIndex: 2,
+        explanation: "Process Control Block (PCB) merepresentasikan setiap proses dalam sistem operasi dan menyimpan konteks eksekusinya sehingga proses dapat dihentikan sementara dan dilanjutkan kembali secara tepat."
+      },
+      {
+        id: 7,
+        topic: "Context Switching",
+        question: "Apa yang terjadi pada sistem ketika CPU melakukan 'Context Switch' dari Proses A ke Proses B?",
+        options: [
+          "Menghapus seluruh data Proses A dari RAM dan memformat ruang swap",
+          "Menyimpan status/konteks Proses A ke dalam PCB-nya, lalu memuat status/konteks Proses B dari PCB-nya ke dalam register CPU",
+          "Mengubah prioritas Proses B menjadi lebih rendah daripada proses idle sistem",
+          "Mematikan seluruh interupsi perangkat keras secara permanen hingga Proses B selesai",
+          "Mengompilasi ulang kode program Proses B sebelum dimasukkan ke dalam cache L1"
+        ],
+        answerIndex: 1,
+        explanation: "Context Switch adalah proses menyimpan state CPU dari proses yang sedang berjalan ke dalam PCB-nya dan memulihkan state proses berikutnya dari PCB-nya. Selama context switch berlangsung, CPU tidak melakukan pekerjaan komputasi aplikasi (pure overhead)."
+      },
+      {
+        id: 8,
+        topic: "Thread & Concurrency",
+        question: "Keuntungan utama penggunaan Multithreading dalam satu proses dibandingkan menjalankan banyak proses terpisah (Multiprocessing) adalah...",
+        options: [
+          "Setiap thread memiliki ruang alamat memori virtual dan tabel berkas terbuka yang sepenuhnya terisolasi",
+          "Thread dalam proses yang sama berbagi ruang alamat memori (code, data, heap) dan sumber daya sehingga pembuatan serta pertukaran konteksnya jauh lebih ringan",
+          "Jika satu thread mengalami error fatal (segmentation fault), thread lain dalam proses tersebut tetap kebal dan berjalan normal",
+          "Multithreading tidak memerlukan sinkronisasi saat mengakses variabel global bersama",
+          "Thread hanya dapat dieksekusi pada sistem komputer dengan satu inti prosesor (single-core)"
+        ],
+        answerIndex: 1,
+        explanation: "Thread (lightweight process) berbagi bagian code, data, dan berkas terbuka dengan thread lain dalam proses induk yang sama, namun masing-masing memiliki Program Counter, register, dan stack sendiri sehingga jauh lebih hemat memori dan cepat dibuat."
+      },
+      {
+        id: 9,
+        topic: "Penjadwalan CPU (CPU Scheduling)",
+        question: "Algoritma penjadwalan CPU yang memberikan jatah waktu eksekusi tetap (time quantum) secara bergiliran kepada setiap proses di antrean siap (ready queue) disebut...",
+        options: [
+          "First-Come, First-Served (FCFS)",
+          "Shortest Job First (SJF) Non-Preemptive",
+          "Round Robin (RR)",
+          "Priority Scheduling Non-Preemptive",
+          "Longest Remaining Time First (LRTF)"
+        ],
+        answerIndex: 2,
+        explanation: "Round Robin (RR) dirancang khusus untuk sistem time-sharing. Setiap proses mendapatkan unit waktu kecil (time quantum, umumnya 10–100 milidetik); jika belum selesai saat quantum habis, proses dipreempt dan diletakkan di akhir ready queue."
+      },
+      {
+        id: 10,
+        topic: "Penjadwalan CPU (CPU Scheduling)",
+        question: "Fenomena 'Starvation' (kelaparan sumber daya) pada algoritma Priority Scheduling dapat diatasi dengan teknik...",
+        options: [
+          "Swapping",
+          "Aging",
+          "Spooling",
+          "Fragmentation",
+          "Thrashing"
+        ],
+        answerIndex: 1,
+        explanation: "Aging adalah teknik menaikkan tingkat prioritas proses secara bertahap seiring lamanya waktu proses tersebut menunggu di dalam ready queue, sehingga proses berprioritas rendah pada akhirnya pasti akan mendapatkan giliran eksekusi."
+      },
+      {
+        id: 11,
+        topic: "Sinkronisasi Proses",
+        question: "Bagian kode program di mana proses mengakses dan memodifikasi sumber daya bersama (shared resources) seperti variabel global atau tabel data, yang tidak boleh dieksekusi oleh lebih dari satu proses secara bersamaan, disebut...",
+        options: [
+          "Entry Section",
+          "Critical Section",
+          "Remainder Section",
+          "Deadlock Section",
+          "Bootstrap Section"
+        ],
+        answerIndex: 1,
+        explanation: "Critical Section adalah segmen kode tempat proses memanipulasi data bersama. Untuk mencegah Race Condition, sistem harus menjamin prinsip Mutual Exclusion di dalam Critical Section."
+      },
+      {
+        id: 12,
+        topic: "Deadlock",
+        question: "Menurut Coffman, berikut ini merupakan empat syarat perlu (necessary conditions) yang harus terpenuhi secara bersamaan agar terjadi Deadlock, KECUALI...",
+        options: [
+          "Mutual Exclusion",
+          "Hold and Wait",
+          "No Preemption",
+          "Circular Wait",
+          "Context Preemption"
+        ],
+        answerIndex: 4,
+        explanation: "Empat syarat Coffman untuk terjadinya deadlock adalah: (1) Mutual Exclusion, (2) Hold and Wait, (3) No Preemption, dan (4) Circular Wait. 'Context Preemption' bukan merupakan syarat terjadinya deadlock."
+      },
+      {
+        id: 13,
+        topic: "Deadlock",
+        question: "Algoritma terkenal yang digunakan oleh sistem operasi untuk penghindaran deadlock (Deadlock Avoidance) dengan memeriksa apakah alokasi sumber daya akan menjaga sistem tetap dalam 'Safe State' adalah...",
+        options: [
+          "Algoritma Dijkstra",
+          "Algoritma Banker (Banker's Algorithm)",
+          "Algoritma Belady",
+          "Algoritma Peterson",
+          "Algoritma Dekker"
+        ],
+        answerIndex: 1,
+        explanation: "Banker's Algorithm (dikembangkan oleh Edsger Dijkstra) mengevaluasi setiap permintaan alokasi sumber daya dengan mensimulasikan apakah sistem masih memiliki urutan eksekusi aman (safe sequence) agar semua proses dapat selesai tanpa deadlock."
+      },
+      {
+        id: 14,
+        topic: "Manajemen Memori",
+        question: "Perbedaan utama antara alamat logika (Logical Address) dan alamat fisik (Physical Address) adalah...",
+        options: [
+          "Alamat logika dihasilkan oleh CPU selama eksekusi program, sedangkan alamat fisik adalah lokasi sebenarnya pada unit memori utama (RAM) yang diterjemahkan oleh MMU",
+          "Alamat logika disimpan di dalam hard disk, sedangkan alamat fisik disimpan di dalam register prosesor",
+          "Alamat logika hanya digunakan pada bahasa Assembly, sedangkan alamat fisik digunakan pada bahasa Python",
+          "Alamat logika bersifat statis dan permanen sejak komputer dirakit, sedangkan alamat fisik berubah setiap detik",
+          "Tidak ada perbedaan; kedua istilah tersebut merujuk pada alamat MAC kartu jaringan"
+        ],
+        answerIndex: 0,
+        explanation: "CPU menghasilkan alamat logika (atau alamat virtual), lalu perangkat keras Memory Management Unit (MMU) memetakannya menjadi alamat fisik aktual di dalam modul RAM saat runtime."
+      },
+      {
+        id: 15,
+        topic: "Manajemen Memori (Paging)",
+        question: "Pada teknik manajemen memori 'Paging', ruang alamat logika proses dibagi menjadi blok-blok berukuran tetap yang disebut..., sedangkan memori fisik dibagi menjadi blok berukuran sama yang disebut...",
+        options: [
+          "Segments; Partitions",
+          "Pages; Frames",
+          "Clusters; Sectors",
+          "Blocks; Tracks",
+          "Threads; Fibers"
+        ],
+        answerIndex: 1,
+        explanation: "Dalam skema Paging, memori fisik dibagi menjadi blok berukuran tetap bernama Frames, dan memori logika dibagi menjadi blok dengan ukuran identik bernama Pages. Paging menghilangkan masalah fragmentasi eksternal."
+      },
+      {
+        id: 16,
+        topic: "Memori Virtual & Thrashing",
+        question: "Kondisi penurunan performa sistem komputer secara drastis karena sistem operasi menghabiskan lebih banyak waktu untuk menukar halaman memori (paging/swapping) antara RAM dan disk daripada mengeksekusi instruksi aplikasi disebut...",
+        options: [
+          "Spooling",
+          "Thrashing",
+          "Overclocking",
+          "Defragmentation",
+          "Caching"
+        ],
+        answerIndex: 1,
+        explanation: "Thrashing terjadi ketika tingkat multiprogramming terlalu tinggi sehingga total working set proses melebihi kapasitas RAM fisik, menyebabkan page fault terjadi terus-menerus dan utilitas CPU anjlok."
+      },
+      {
+        id: 17,
+        topic: "Algoritma Penggantian Halaman",
+        question: "Algoritma Page Replacement yang mengganti halaman memori yang paling lama tidak digunakan di masa lampau (berdasarkan prinsip lokalitas temporal) adalah...",
+        options: [
+          "First-In, First-Out (FIFO)",
+          "Least Recently Used (LRU)",
+          "Most Recently Used (MRU)",
+          "Random Replacement",
+          "Shortest Seek Time First (SSTF)"
+        ],
+        answerIndex: 1,
+        explanation: "Least Recently Used (LRU) melacak waktu penggunaan terakhir tiap halaman dan mengganti halaman yang paling lama tidak diakses ketika terjadi page fault."
+      },
+      {
+        id: 18,
+        topic: "Sistem Berkas (File System)",
+        question: "Pada sistem operasi Linux/UNIX, struktur data yang menyimpan metadata penting sebuah berkas (seperti hak akses, pemilik, ukuran, timestamp, dan pointer ke blok data) kecuali nama berkasnya adalah...",
+        options: [
+          "Superblock",
+          "Inode (Index Node)",
+          "Boot Sector",
+          "Registry Hive",
+          "Swap Partition"
+        ],
+        answerIndex: 1,
+        explanation: "Di sistem berkas bergaya UNIX (seperti ext4), nama berkas disimpan di dalam entri direktori yang memetakan nama tersebut ke nomor Inode, sedangkan Inode menyimpan seluruh atribut dan penunjuk lokasi blok data berkas."
+      },
+      {
+        id: 19,
+        topic: "Sistem Berkas (File System)",
+        question: "Keunggulan utama sistem berkas berfitur 'Journaling' (seperti NTFS pada Windows dan ext4 pada Linux) dibandingkan sistem berkas non-journaling (seperti FAT32) adalah...",
+        options: [
+          "Mampu mengompresi ukuran berkas video hingga 90% tanpa kehilangan kualitas",
+          "Mencatat rencana perubahan metadata/data ke dalam log (journal) sebelum diterapkan ke disk, sehingga mempercepat pemulihan dan mencegah korupsi data saat listrik padam mendadak",
+          "Memungkinkan satu partisi hard disk dibaca langsung oleh BIOS tanpa bootloader",
+          "Menghilangkan kebutuhan akan alamat IP saat berbagi berkas melalui jaringan lokal",
+          "Membatasi ukuran maksimum satu berkas menjadi tepat 4 GB demi keamanan"
+        ],
+        answerIndex: 1,
+        explanation: "Journaling file system menulis catatan transaksi perubahan ke area log khusus (journal) sebelum melakukan modifikasi utama. Jika terjadi crash atau mati listrik, sistem cukup memutar ulang (replay) journal untuk menjaga konsistensi struktur berkas."
+      },
+      {
+        id: 20,
+        topic: "Manajemen I/O & Disk",
+        question: "Teknik memindahkan blok data dalam jumlah besar secara langsung antara perangkat I/O berkecepatan tinggi dan memori utama (RAM) tanpa melibatkan CPU untuk menyalin setiap byte data disebut...",
+        options: [
+          "Programmed I/O (Polling)",
+          "Direct Memory Access (DMA)",
+          "Memory-Mapped I/O",
+          "Spooling",
+          "Bus Arbitration"
+        ],
+        answerIndex: 1,
+        explanation: "Dengan Direct Memory Access (DMA), CPU hanya menginisialisasi pengendali DMA (alamat awal, jumlah byte, arah transfer), lalu DMA Controller mentransfer data langsung ke/dari RAM dan memberi tahu CPU melalui interupsi setelah selesai."
+      },
+      {
+        id: 21,
+        topic: "Proses Booting Sistem",
+        question: "Urutan tahapan proses booting sistem komputer modern berbasis UEFI hingga sistem operasi siap digunakan adalah...",
+        options: [
+          "Login Screen → Kernel Initialization → Bootloader → UEFI/POST",
+          "Kernel Initialization → UEFI/POST → Login Screen → Bootloader",
+          "UEFI/POST → Bootloader (misal GRUB / Windows Boot Manager) → Kernel Initialization → Init/Systemd & User Space",
+          "Bootloader → User Space → UEFI/POST → Kernel Initialization",
+          "Init/Systemd → Bootloader → Kernel Initialization → UEFI/POST"
+        ],
+        answerIndex: 2,
+        explanation: "Saat dinyalakan, firmware UEFI melakukan inisialisasi perangkat keras (POST), lalu memuat Bootloader dari partisi EFI (ESP). Bootloader memuat kernel OS ke RAM, yang kemudian menginisialisasi driver dan menjalankan proses induk user space (seperti systemd/init) hingga layar login."
+      },
+      {
+        id: 22,
+        topic: "Perbandingan Sistem Operasi",
+        question: "Pernyataan manakah yang PALING TEPAT membandingkan keluarga sistem operasi Windows, Linux, dan macOS?",
+        options: [
+          "Ketiganya menggunakan kernel yang sama yaitu Linux Kernel versi modifikasi",
+          "Windows menggunakan kernel hybrid NT, Linux menggunakan kernel monolitik open-source, dan macOS menggunakan kernel hybrid XNU berbasis Mach dan BSD (bersertifikasi UNIX)",
+          "macOS adalah sistem operasi open-source sepenuhnya, sedangkan Linux bersifat proprietary komersial",
+          "Windows dan macOS menggunakan sistem manajemen paket APT dan RPM secara bawaan",
+          "Linux tidak mendukung antarmuka grafis (GUI) dan hanya dapat dioperasikan melalui antarmuka baris perintah (CLI)"
+        ],
+        answerIndex: 1,
+        explanation: "Windows modern berbasis arsitektur Windows NT (hybrid kernel); Linux adalah kernel monolitik modular berlisensi GPL (open-source); sedangkan macOS dibangun di atas kernel hybrid XNU (kombinasi microkernel Mach dan komponen BSD) yang memiliki sertifikasi resmi UNIX."
+      },
+      {
+        id: 23,
+        topic: "Hak Akses Linux (Permissions)",
+        question: "Pada sistem operasi Linux, jika administrator menjalankan perintah 'chmod 750 laporan.sh', apa arti izin akses (permission) yang diterapkan pada berkas tersebut?",
+        options: [
+          "Owner: read, write, execute; Group: read, execute; Others: tidak memiliki akses sama sekali",
+          "Owner: read, write; Group: read, write, execute; Others: execute saja",
+          "Owner: read saja; Group: write dan execute; Others: read, write, execute",
+          "Semua pengguna (Owner, Group, Others) dapat membaca, menulis, dan mengeksekusi berkas tersebut",
+          "Owner: tidak ada akses; Group: read dan execute; Others: read, write, execute"
+        ],
+        answerIndex: 0,
+        explanation: "Dalam notasi oktal Linux: r=4, w=2, x=1. Angka 7 (4+2+1) untuk Owner berarti rwx; angka 5 (4+0+1) untuk Group berarti r-x; dan angka 0 untuk Others berarti --- (tanpa akses)."
+      },
+      {
+        id: 24,
+        topic: "Virtualisasi & Kontainerisasi",
+        question: "Perbedaan mendasar antara Virtual Machine (VM) tradisional dengan Container (seperti Docker) terletak pada...",
+        options: [
+          "Container menjalankan sistem operasi tamu (Guest OS) dan kernel lengkap tersendiri di atas hypervisor, sedangkan VM berbagi kernel host",
+          "Container berbagi kernel sistem operasi host dengan mengisolasi proses di ruang pengguna (menggunakan namespaces & cgroups), sehingga jauh lebih ringan dan cepat dijalankan dibanding VM yang menyertakan Guest OS penuh",
+          "Virtual Machine hanya dapat dijalankan di Windows, sedangkan Container hanya dapat dijalankan di macOS",
+          "Container membutuhkan perangkat keras prosesor khusus tanpa bantuan sistem operasi host sama sekali",
+          "Virtual Machine tidak dapat terhubung ke jaringan virtual"
+        ],
+        answerIndex: 1,
+        explanation: "VM memvirtualisasikan perangkat keras sehingga setiap VM menjalankan Guest OS dan kernelnya sendiri. Sebaliknya, Container memvirtualisasikan tingkat sistem operasi dengan berbagi kernel OS host, membuat ukuran image lebih kecil dan waktu startup dalam hitungan milidetik."
+      },
+      {
+        id: 25,
+        topic: "Keamanan Sistem Operasi",
+        question: "Serangan perangkat lunak berbahaya yang mengeksploitasi celah keamanan kernel atau konfigurasi sistem operasi untuk meningkatkan hak akses dari pengguna standar (standard user) menjadi administrator/root disebut...",
+        options: [
+          "Denial of Service (DoS)",
+          "Privilege Escalation",
+          "DNS Spoofing",
+          "Phishing",
+          "Fragmentation Attack"
+        ],
+        answerIndex: 1,
+        explanation: "Privilege Escalation (eskalasi hak istimewa) terjadi ketika penyerang memanfaatkan bug, kesalahan konfigurasi izin berkas, atau kerentanan kernel untuk memperoleh tingkat otoritas yang lebih tinggi (misalnya menjadi root di Linux atau SYSTEM di Windows)."
+      }
+    ];
+
+    // State Aplikasi
+    const EXAM_DURATION_SECONDS = 45 * 60; // 45 menit = 2700 detik
+    let currentQuestionIndex = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+    let studentName = "";
+    let studentClass = "";
+    let remainingSeconds = EXAM_DURATION_SECONDS;
+    let timerInterval = null;
+    let isSubmitted = false;
+
+    // Elemen DOM
+    const landingScreen = document.getElementById("landing-screen");
+    const examScreen = document.getElementById("exam-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const examHeaderInfo = document.getElementById("exam-header-info");
+    const startForm = document.getElementById("start-form");
+
+    const timerBox = document.getElementById("timer-box");
+    const timerDisplay = document.getElementById("timer-display");
+    const timerIcon = document.getElementById("timer-icon");
+
+    const questionBadge = document.getElementById("question-badge");
+    const questionTopic = document.getElementById("question-topic");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const questionNavGrid = document.getElementById("question-nav-grid");
+    const answeredCounter = document.getElementById("answered-counter");
+
+    const btnPrev = document.getElementById("btn-prev");
+    const btnNext = document.getElementById("btn-next");
+    const btnClearAnswer = document.getElementById("btn-clear-answer");
+    const btnOpenSubmitModal = document.getElementById("btn-open-submit-modal");
+    const submitModal = document.getElementById("submit-modal");
+    const modalSummaryText = document.getElementById("modal-summary-text");
+    const btnCancelSubmit = document.getElementById("btn-cancel-submit");
+    const btnConfirmSubmit = document.getElementById("btn-confirm-submit");
+    const btnRetryExam = document.getElementById("btn-retry-exam");
+
+    const optionLetters = ["A", "B", "C", "D", "E"];
+
+    // 1. Event Mulai Ujian
+    startForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      studentName = document.getElementById("student-name").value.trim();
+      studentClass = document.getElementById("student-class").value.trim();
+
+      if (!studentName || !studentClass) return;
+
+      document.getElementById("header-student-name").textContent = studentName;
+      document.getElementById("header-student-class").textContent = "Kelas: " + studentClass;
+
+      landingScreen.classList.add("hidden");
+      examScreen.classList.remove("hidden");
+      examHeaderInfo.classList.remove("hidden");
+
+      initExam();
+    });
+
+    function initExam() {
+      currentQuestionIndex = 0;
+      userAnswers = new Array(quizData.length).fill(null);
+      remainingSeconds = EXAM_DURATION_SECONDS;
+      isSubmitted = false;
+
+      resetTimerStyle();
+      renderNavGrid();
+      renderQuestion(0);
+      startTimer();
+    }
+
+    // 2. Logika Timer Hitung Mundur
+    function startTimer() {
+      clearInterval(timerInterval);
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateTimerUI();
+
+        if (remainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          submitExam(true);
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      const mins = Math.floor(Math.max(0, remainingSeconds) / 60);
+      const secs = Math.max(0, remainingSeconds) % 60;
+      timerDisplay.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+
+      // Peringatan visual saat waktu tersisa <= 5 menit (300 detik)
+      if (remainingSeconds <= 300 && remainingSeconds > 60) {
+        timerBox.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 font-mono font-bold text-sm sm:text-base transition-colors";
+        timerIcon.className = "h-4 w-4 text-amber-600";
+      } else if (remainingSeconds <= 60) {
+        timerBox.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-rose-600 border border-rose-700 text-white font-mono font-bold text-sm sm:text-base timer-danger";
+        timerIcon.className = "h-4 w-4 text-white";
+      }
+    }
+
+    function resetTimerStyle() {
+      timerBox.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 font-mono font-bold text-sm sm:text-base transition-colors";
+      timerIcon.className = "h-4 w-4 text-indigo-600";
+    }
+
+    // 3. Render Soal & Pilihan Jawaban
+    function renderQuestion(index) {
+      currentQuestionIndex = index;
+      const item = quizData[index];
+
+      questionBadge.textContent = `Soal No. ${index + 1} dari ${quizData.length}`;
+      questionTopic.textContent = `Topik: ${item.topic}`;
+      questionText.textContent = item.question;
+
+      optionsContainer.innerHTML = "";
+
+      item.options.forEach((optText, optIdx) => {
+        const isSelected = userAnswers[index] === optIdx;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `w-full text-left p-4 rounded-xl border-2 transition flex items-start gap-3.5 cursor-pointer ${
+          isSelected
+            ? "border-indigo-600 bg-indigo-50/70 shadow-xs"
+            : "border-slate-200 hover:border-indigo-300 hover:bg-slate-50"
+        }`;
+
+        btn.innerHTML = `
+          <span class="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center font-bold text-sm transition ${
+            isSelected
+              ? "bg-indigo-600 text-white"
+              : "bg-slate-100 text-slate-700"
+          }">
+            ${optionLetters[optIdx]}
+          </span>
+          <span class="text-sm sm:text-base leading-snug pt-1 ${
+            isSelected ? "font-semibold text-indigo-950" : "text-slate-700"
+          }">
+            ${optText}
+          </span>
+        `;
+
+        btn.addEventListener("click", () => {
+          userAnswers[index] = optIdx;
+          renderQuestion(index);
+          renderNavGrid();
+        });
+
+        optionsContainer.appendChild(btn);
+      });
+
+      // Update status tombol navigasi
+      btnPrev.disabled = index === 0;
+      if (index === quizData.length - 1) {
+        btnNext.innerHTML = `<span>Selesai Ujian</span>`;
+        btnNext.className = "px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm flex items-center gap-1.5 transition cursor-pointer";
+      } else {
+        btnNext.innerHTML = `
+          <span>Selanjutnya</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        `;
+        btnNext.className = "px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm flex items-center gap-1.5 transition cursor-pointer";
+      }
+
+      renderNavGrid();
+    }
+
+    // 4. Render Grid Nomor Navigasi Soal
+    function renderNavGrid() {
+      questionNavGrid.innerHTML = "";
+      const answeredCount = userAnswers.filter((ans) => ans !== null).length;
+      answeredCounter.textContent = `${answeredCount} / ${quizData.length} Dijawab`;
+
+      quizData.forEach((_, idx) => {
+        const isCurrent = idx === currentQuestionIndex;
+        const isAnswered = userAnswers[idx] !== null;
+
+        const navBtn = document.createElement("button");
+        navBtn.type = "button";
+        navBtn.textContent = idx + 1;
+
+        let styleClass = "h-10 rounded-lg font-bold text-xs sm:text-sm transition flex items-center justify-center cursor-pointer ";
+        if (isCurrent) {
+          styleClass += "bg-indigo-600 text-white ring-2 ring-indigo-300 shadow-xs";
+        } else if (isAnswered) {
+          styleClass += "bg-emerald-500 text-white hover:bg-emerald-600";
+        } else {
+          styleClass += "bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200";
+        }
+
+        navBtn.className = styleClass;
+        navBtn.addEventListener("click", () => renderQuestion(idx));
+        questionNavGrid.appendChild(navBtn);
+      });
+    }
+
+    // Event Tombol Navigasi Soal
+    btnPrev.addEventListener("click", () => {
+      if (currentQuestionIndex > 0) {
+        renderQuestion(currentQuestionIndex - 1);
+      }
+    });
+
+    btnNext.addEventListener("click", () => {
+      if (currentQuestionIndex < quizData.length - 1) {
+        renderQuestion(currentQuestionIndex + 1);
+      } else {
+        openSubmitConfirmation();
+      }
+    });
+
+    btnClearAnswer.addEventListener("click", () => {
+      userAnswers[currentQuestionIndex] = null;
+      renderQuestion(currentQuestionIndex);
+      renderNavGrid();
+    });
+
+    // 5. Konfirmasi & Submit Ujian
+    function openSubmitConfirmation() {
+      const answeredCount = userAnswers.filter((ans) => ans !== null).length;
+      const unansweredCount = quizData.length - answeredCount;
+
+      if (unansweredCount > 0) {
+        modalSummaryText.innerHTML = `Anda telah menjawab <strong>${answeredCount} dari ${quizData.length} soal</strong>. Masih ada <strong class="text-rose-600">${unansweredCount} soal belum dijawab</strong>. Apakah Anda yakin ingin mengakhiri dan mengumpulkan ujian sekarang?`;
+      } else {
+        modalSummaryText.innerHTML = `Luar biasa! Seluruh <strong>${quizData.length} soal</strong> telah dijawab. Apakah Anda yakin ingin mengumpulkan jawaban sekarang?`;
+      }
+
+      submitModal.classList.remove("hidden");
+    }
+
+    btnOpenSubmitModal.addEventListener("click", openSubmitConfirmation);
+    btnCancelSubmit.addEventListener("click", () => submitModal.classList.add("hidden"));
+    btnConfirmSubmit.addEventListener("click", () => {
+      submitModal.classList.add("hidden");
+      submitExam(false);
+    });
+
+    function submitExam(isAutoTimeout) {
+      if (isSubmitted) return;
+      isSubmitted = true;
+      clearInterval(timerInterval);
+
+      // Hitung skor
+      let correctCount = 0;
+      quizData.forEach((item, idx) => {
+        if (userAnswers[idx] === item.answerIndex) {
+          correctCount++;
+        }
+      });
+
+      const wrongCount = quizData.length - correctCount;
+      const finalScore = Math.round((correctCount / quizData.length) * 100);
+
+      // Hitung durasi pengerjaan
+      const elapsedSeconds = EXAM_DURATION_SECONDS - Math.max(0, remainingSeconds);
+      const elapsedMins = Math.floor(elapsedSeconds / 60);
+      const elapsedSecs = elapsedSeconds % 60;
+      const formattedDuration = `${String(elapsedMins).padStart(2, "0")}:${String(elapsedSecs).padStart(2, "0")}`;
+
+      // Predikat nilai
+      let predicate = "";
+      if (finalScore >= 90) predicate = "Sangat Baik (Kompeten)";
+      else if (finalScore >= 75) predicate = "Baik (Tuntas KKM)";
+      else if (finalScore >= 60) predicate = "Cukup (Perlu Pengayaan)";
+      else predicate = "Perlu Remedial";
+
+      // Tampilkan data ke halaman hasil
+      document.getElementById("res-student-name").textContent = studentName;
+      document.getElementById("res-student-class").textContent = studentClass;
+
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      document.getElementById("res-timestamp").textContent = `Selesai pada: ${dateStr} WIB ${isAutoTimeout ? "(Waktu Habis Otomatis)" : ""}`;
+
+      document.getElementById("res-score").textContent = finalScore;
+      document.getElementById("res-predicate").textContent = predicate;
+      document.getElementById("res-correct").textContent = correctCount;
+      document.getElementById("res-wrong").textContent = wrongCount;
+      document.getElementById("res-duration").textContent = formattedDuration;
+
+      renderReviewList("all");
+
+      // Pindah tampilan ke Result Screen
+      examScreen.classList.add("hidden");
+      examHeaderInfo.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // 6. Render Review & Pembahasan
+    function renderReviewList(filterMode) {
+      const reviewList = document.getElementById("review-list");
+      reviewList.innerHTML = "";
+
+      quizData.forEach((item, idx) => {
+        const userAns = userAnswers[idx];
+        const isCorrect = userAns === item.answerIndex;
+
+        if (filterMode === "wrong" && isCorrect) return;
+
+        const card = document.createElement("div");
+        card.className = `p-5 rounded-2xl border print-break-inside ${
+          isCorrect
+            ? "border-emerald-200 bg-emerald-50/30"
+            : "border-rose-200 bg-rose-50/30"
+        }`;
+
+        const userChoiceText =
+          userAns !== null
+            ? `${optionLetters[userAns]}. ${item.options[userAns]}`
+            : "Tidak Dijawab (Kosong)";
+
+        const correctChoiceText = `${optionLetters[item.answerIndex]}. ${item.options[item.answerIndex]}`;
+
+        card.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-md text-xs font-bold ${
+                isCorrect ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"
+              }">
+                Soal #${idx + 1}
+              </span>
+              <span class="text-xs font-medium text-slate-500">${item.topic}</span>
+            </div>
+            <span class="text-xs font-bold ${isCorrect ? "text-emerald-700" : "text-rose-700"}">
+              ${isCorrect ? "✓ Jawaban Benar" : "✕ Jawaban Kurang Tepat"}
+            </span>
+          </div>
+
+          <p class="text-sm sm:text-base font-semibold text-slate-900 mb-3 leading-relaxed">
+            ${item.question}
+          </p>
+
+          <div class="space-y-1.5 text-xs sm:text-sm mb-3">
+            <p class="${isCorrect ? "text-emerald-800" : "text-rose-800"}">
+              <span class="font-semibold">Jawaban Anda:</span> ${userChoiceText}
+            </p>
+            ${
+              !isCorrect
+                ? `<p class="text-emerald-800"><span class="font-semibold">Kunci Jawaban:</span> ${correctChoiceText}</p>`
+                : ""
+            }
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-xl p-3.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <span class="font-bold text-indigo-700 block mb-0.5">Pembahasan:</span>
+            ${item.explanation}
+          </div>
+        `;
+
+        reviewList.appendChild(card);
+      });
+
+      if (reviewList.innerHTML === "") {
+        reviewList.innerHTML = `
+          <div class="text-center py-8 text-slate-500 text-sm">
+            Selamat! Tidak ada jawaban salah atau kosong. Semua soal dijawab dengan benar.
+          </div>
+        `;
+      }
+    }
+
+    function filterReview(mode) {
+      const btnAll = document.getElementById("filter-all");
+      const btnWrong = document.getElementById("filter-wrong");
+
+      if (mode === "all") {
+        btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white cursor-pointer";
+        btnWrong.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer";
+      } else {
+        btnWrong.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white cursor-pointer";
+        btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer";
+      }
+
+      renderReviewList(mode);
+    }
+
+    // 7. Tombol Ulangi Ujian
+    btnRetryExam.addEventListener("click", () => {
+      resultScreen.classList.add("hidden");
+      landingScreen.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</body>
+</html>
